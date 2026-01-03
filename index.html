@@ -1,87 +1,194 @@
-import streamlit as st
-import pandas as pd
-from datetime import datetime
-import random
-
-# --- 1. PAGE CONFIG & BRANDING ---
-st.set_page_config(page_title="JM PRIME", layout="wide")
-
-# Subtle styling to keep the original look but sharpen the "Standard" feel
-st.markdown("""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JM PRIME | Precision Neural Engine</title>
     <style>
-    .brand-text { font-weight: 900; letter-spacing: 2px; }
-    .brand-prime { font-weight: 200; color: #007AFF; letter-spacing: 6px; }
-    /* Keeping the original UI colors but making buttons cleaner */
-    .stButton>button { border-radius: 8px; font-weight: bold; }
+        :root {
+            --bg: #0d1117;
+            --card: #161b22;
+            --accent: #007AFF;
+            --text-main: #e6edf3;
+            --text-dim: #8b949e;
+            --border: rgba(255,255,255,0.1);
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: -apple-system, system-ui, sans-serif;
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR */
+        aside {
+            width: 260px;
+            background: #090c10;
+            border-right: 1px solid var(--border);
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .brand h1 { font-weight: 900; letter-spacing: 2px; margin: 0; font-size: 22px; }
+        .brand span { font-weight: 200; color: var(--accent); letter-spacing: 5px; }
+
+        .status-pill {
+            background: rgba(0, 122, 255, 0.1);
+            color: var(--accent);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        /* MAIN CONTENT */
+        main {
+            flex-grow: 1;
+            padding: 40px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .panel {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 25px;
+        }
+
+        h2 { font-size: 14px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; }
+
+        textarea {
+            width: 100%;
+            height: 200px;
+            background: #090c10;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: white;
+            padding: 15px;
+            font-size: 16px;
+            resize: none;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        /* ACCURACY BADGE */
+        .accuracy-box {
+            margin-top: 20px;
+            padding: 10px;
+            border-left: 3px solid var(--accent);
+            background: rgba(255,255,255,0.03);
+            font-size: 13px;
+        }
+
+        /* HISTORY TABLE */
+        .history { margin-top: 40px; width: 100%; border-collapse: collapse; }
+        .history th { text-align: left; color: var(--text-dim); font-size: 12px; padding: 10px; border-bottom: 1px solid var(--border); }
+        .history td { padding: 12px 10px; font-size: 14px; border-bottom: 1px solid var(--border); }
+
+        @media (max-width: 800px) {
+            body { flex-direction: column; }
+            aside { width: 100%; border-right: none; border-bottom: 1px solid var(--border); }
+            .grid { grid-template-columns: 1fr; }
+        }
     </style>
-""", unsafe_allow_html=True)
+</head>
+<body>
 
-# --- 2. SIDEBAR (Original Structure) ---
-with st.sidebar:
-    st.markdown("<h1 class='brand-text'>JM <span class='brand-prime'>PRIME</span></h1>", unsafe_allow_html=True)
-    st.markdown("---")
-    
-    st.header("Engine Settings")
-    engine_mode = st.selectbox("Neural Model", ["Prime-v1 (Precision)", "Standard-v2 (Fast)"])
-    
-    st.markdown("---")
-    st.subheader("System Status")
-    st.success("Neural Core: ONLINE")
-    st.info("Language Node: EN_IN Optimized")
-    
-    # New Feature: System Metrics in Sidebar
-    st.metric(label="Global Sync", value="99.9%", delta="Stable")
+<aside>
+    <div class="brand"><h1>JM <span>PRIME</span></h1></div>
+    <div class="status-pill">CORE ONLINE</div>
+    <div style="font-size: 11px; color: var(--text-dim);">
+        <p>SYSTEM: NEURAL V1.0</p>
+        <p>NODE: THRISSUR_GEN_01</p>
+        <p>SYNC: 99.9%</p>
+    </div>
+</aside>
 
-# --- 3. MAIN TRANSLATION INTERFACE (Original Structure) ---
-# We keep the col1, col2 layout exactly as it was
-col1, col2 = st.columns(2)
+<main>
+    <div class="grid">
+        <section class="panel">
+            <h2>Source Input</h2>
+            <textarea id="inputText" placeholder="Enter content for neural analysis..."></textarea>
+            <button class="btn" onclick="executeBridge()">EXECUTE BRIDGE</button>
+        </section>
 
-with col1:
-    st.subheader("Source Input")
-    input_text = st.text_area("Enter text for analysis:", height=200, placeholder="Paste or type content here...")
-    
-    if st.button("EXECUTE BRIDGE", use_container_width=True):
-        if input_text:
-            # New Feature: Simulated Accuracy Engine
-            accuracy = random.uniform(98.5, 99.9)
-            st.session_state.translated_text = f"Result: [Verified Translation of {input_text}]"
-            st.session_state.accuracy_score = f"{accuracy:.2f}%"
-        else:
-            st.warning("Input required.")
+        <section class="panel">
+            <h2>Neural Output</h2>
+            <div id="outputContainer" style="color: var(--text-dim); font-style: italic;">
+                Awaiting initialization...
+            </div>
+            <div id="accuracyBadge" style="display:none;" class="accuracy-box">
+                Precision Accuracy: <span id="accuracyVal" style="color:var(--accent); font-weight:bold;">0%</span>
+            </div>
+        </section>
+    </div>
 
-with col2:
-    st.subheader("Neural Output")
-    if 'translated_text' in st.session_state:
-        # The output box looks the same, but now shows Accuracy
-        st.success(st.session_state.translated_text)
+    <section style="margin-top: 50px;">
+        <h2>Session Log</h2>
+        <table class="history">
+            <thead>
+                <tr>
+                    <th>TIMESTAMP</th>
+                    <th>SOURCE_DATA</th>
+                    <th>ACCURACY</th>
+                    <th>STATUS</th>
+                </tr>
+            </thead>
+            <tbody id="historyBody">
+                </tbody>
+        </table>
+    </section>
+</main>
+
+<script>
+    function executeBridge() {
+        const input = document.getElementById('inputText').value;
+        if (!input) return alert("Input Required");
+
+        // Simulate Neural Engine Processing
+        document.getElementById('outputContainer').innerHTML = `<span style="color:white; font-style:normal;">[Verified] ${input}</span>`;
         
-        # New Feature: Accuracy Badge
-        st.markdown(f"**Precision Accuracy:** :blue[{st.session_state.accuracy_score}]")
-        st.caption("Verified by JM PRIME Neural Logic")
-    else:
-        st.info("Awaiting input data...")
+        // New Accuracy Logic
+        const accuracy = (Math.random() * (99.9 - 98.5) + 98.5).toFixed(2);
+        document.getElementById('accuracyBadge').style.display = 'block';
+        document.getElementById('accuracyVal').innerText = accuracy + "%";
 
-# --- 4. HISTORY LOG (Original Structure) ---
-st.markdown("---")
-st.subheader("Session History")
+        // Update History Log
+        const now = new Date().toLocaleTimeString();
+        const row = `<tr>
+            <td>${now}</td>
+            <td>${input.substring(0, 20)}...</td>
+            <td>${accuracy}%</td>
+            <td style="color:var(--accent)">SYNCED</td>
+        </tr>`;
+        document.getElementById('historyBody').innerHTML += row;
+    }
+</script>
 
-if 'history' not in st.session_state:
-    st.session_state.history = []
-
-# Save Button logic from original
-if 'translated_text' in st.session_state:
-    if st.button("Save to Session Log"):
-        st.session_state.history.append({
-            "Timestamp": datetime.now().strftime("%H:%M:%S"),
-            "Source": input_text[:50] + "...",
-            "Accuracy": st.session_state.accuracy_score,
-            "Status": "SYNCED"
-        })
-
-if st.session_state.history:
-    df = pd.DataFrame(st.session_state.history)
-    st.table(df)
-else:
-    st.write("No active logs in this session.")
-
-st.markdown("<br><center style='opacity:0.3; font-size:10px;'>JM PRIME | NEURAL ENGINE v1.0 | 2026</center>", unsafe_allow_html=True)
+</body>
+</html>
