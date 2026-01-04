@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>JM PRIME | Precision Translation</title>
+    <title>JM PRIME | Universal Translator</title>
     
     <script src="https://code.responsivevoice.org/responsivevoice.js?key=YOUR_FREE_KEY"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src='https://unpkg.com/tesseract.js@v2.1.0/dist/tesseract.min.js'></script>
 
     <style>
         :root { --primary: #007AFF; --bg: #0d1117; --card: #161b22; --text: #f0f6fc; }
@@ -15,7 +16,7 @@
         body { background: var(--bg); margin: 0; padding: 20px; color: var(--text); padding-bottom: 140px; }
 
         /* --- ZOOM-IN LOGO SPLASH --- */
-        #splash { position: fixed; inset: 0; background: #070a13; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        #splash { position: fixed; inset: 0; background: #070a13; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease; }
         .seal-container { position: relative; width: 150px; height: 150px; display: flex; align-items: center; justify-content: center; cursor: pointer; animation: breathe 3s infinite ease-in-out; }
         .seal-outer { position: absolute; width: 130px; height: 130px; border: 2px solid var(--primary); border-radius: 50%; opacity: 0.5; }
         .seal-inner { width: 70px; height: 70px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 24px; box-shadow: 0 0 30px rgba(0, 122, 255, 0.4); }
@@ -25,37 +26,44 @@
             50% { transform: scale(1.1); opacity: 1; }
         }
 
-        /* --- CENTERED HEADER --- */
+        /* --- HEADER --- */
         header { text-align: center; margin-bottom: 30px; }
         .brand-title { font-size: 28px; font-weight: 900; letter-spacing: 2px; margin: 0; }
         .brand-prime { font-weight: 200; color: var(--primary); letter-spacing: 6px; margin-left: 5px; }
 
         /* --- INTERFACE --- */
-        .glass-card { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 15px; border: 1px solid #30363d; position: relative; }
+        .glass-card { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 15px; border: 1px solid #30363d; position: relative; transition: border 0.3s; }
+        .glass-card:focus-within { border-color: var(--primary); }
+        
         .label { font-size: 10px; font-weight: 800; color: #8b949e; text-transform: uppercase; margin-bottom: 10px; display: block; letter-spacing: 2px; }
         textarea { width: 100%; height: 110px; border: none; font-size: 19px; background: transparent; outline: none; resize: none; color: var(--text); line-height: 1.5; }
         
         .card-actions { position: absolute; top: 18px; right: 18px; display: flex; gap: 8px; }
-        .mini-btn { background: #30363d; border: none; border-radius: 8px; padding: 6px 12px; color: #c9d1d9; font-size: 10px; font-weight: bold; cursor: pointer; }
+        .mini-btn { background: #30363d; border: none; border-radius: 8px; padding: 6px 12px; color: #c9d1d9; font-size: 10px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .mini-btn:active { transform: scale(0.95); background: var(--primary); color: white; }
 
-        .lang-select { width:100%; padding:15px; border-radius:12px; background:var(--card); border: 1px solid #30363d; color:var(--text); font-weight:bold; margin-bottom:15px; appearance: none; font-size: 16px; border-left: 4px solid var(--primary); }
+        .lang-select { width:100%; padding:15px; border-radius:12px; background:var(--card); border: 1px solid #30363d; color:var(--text); font-weight:bold; margin-bottom:15px; appearance: none; font-size: 16px; border-left: 4px solid var(--primary); outline: none; }
 
         .bottom-nav { position: fixed; bottom: 25px; left: 15px; right: 15px; background: #161b22; padding: 10px; border-radius: 25px; display: flex; gap: 8px; border: 1px solid #30363d; z-index: 1000; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
-        .nav-btn { flex: 1; height: 52px; border-radius: 18px; border: none; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .nav-btn { flex: 1; height: 52px; border-radius: 18px; border: none; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .nav-btn:active { transform: scale(0.90); }
         .btn-main { flex: 2.5; background: var(--primary); font-weight: bold; font-size: 16px; letter-spacing: 1px; }
         
-        /* Hidden file input for scanner */
         #scanInput { display: none; }
+        
+        /* Status Bar for OCR */
+        #ocrStatus { display: none; font-size: 12px; color: var(--primary); text-align: center; margin-bottom: 10px; font-weight: bold; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
     </style>
 </head>
 <body>
 
-    <div id="splash" onclick="this.style.display='none'">
+    <div id="splash" onclick="dismissSplash()">
         <div class="seal-container">
             <div class="seal-outer"></div>
             <div class="seal-inner">JM</div>
         </div>
-        <div style="margin-top:20px; color:#8b949e; letter-spacing:5px; font-size:10px; font-weight:900;">CLICK TO INITIALIZE</div>
+        <div style="margin-top:20px; color:#8b949e; letter-spacing:5px; font-size:10px; font-weight:900;">SYSTEM READY</div>
     </div>
 
     <header>
@@ -64,19 +72,35 @@
     </header>
 
     <select id="userLang" class="lang-select">
-        <option value="ml">Malayalam (മലയാളം)</option>
-        <option value="hi">Hindi (हिन्दी)</option>
-        <option value="ta">Tamil (தமிழ்)</option>
+        <optgroup label="Indian Languages">
+            <option value="ml|Malayalam Male">Malayalam (മലയാളം)</option>
+            <option value="hi|Hindi Female">Hindi (हिन्दी)</option>
+            <option value="ta|Tamil Male">Tamil (தமிழ்)</option>
+            <option value="bn|Bengali India Female">Bengali (বাংলা)</option>
+            <option value="gu|Gujarati Female">Gujarati (ગુજરાતી)</option>
+            <option value="kn|Kannada Female">Kannada (ಕನ್ನಡ)</option>
+            <option value="te|Telugu Female">Telugu (తెలుగు)</option>
+        </optgroup>
+        <optgroup label="Global Languages">
+            <option value="es|Spanish Latin American Female">Spanish (Español)</option>
+            <option value="fr|French Female">French (Français)</option>
+            <option value="de|Deutsch Female">German (Deutsch)</option>
+            <option value="zh-CN|Chinese Female">Chinese (中文)</option>
+            <option value="ar|Arabic Male">Arabic (العربية)</option>
+            <option value="ru|Russian Female">Russian (Русский)</option>
+            <option value="ja|Japanese Female">Japanese (日本語)</option>
+        </optgroup>
     </select>
 
     <div class="glass-card">
+        <div id="ocrStatus">SCANNING IMAGE... PLEASE WAIT</div>
         <div class="card-actions">
-            <input type="file" id="scanInput" accept="image/*" onchange="handleImageScan(this)">
+            <input type="file" id="scanInput" accept="image/*" onchange="processImage(this)">
             <button class="mini-btn" title="Photo Scanner" onclick="document.getElementById('scanInput').click()">📷</button>
             <button class="mini-btn" onclick="doClear()">CLEAR</button>
         </div>
         <span class="label">English Source</span>
-        <textarea id="srcInput" oninput="updateCounter()" placeholder="Enter text to translate..."></textarea>
+        <textarea id="srcInput" oninput="updateCounter()" placeholder="Type here or scan an image..."></textarea>
     </div>
 
     <div class="glass-card" id="outCard">
@@ -95,28 +119,91 @@
     </div>
 
     <script>
+        // Dismiss Splash
+        function dismissSplash() {
+            const s = document.getElementById('splash');
+            s.style.opacity = '0';
+            setTimeout(() => s.style.display = 'none', 500);
+        }
+
+        // Character Counter
         function updateCounter() {
             document.getElementById('counter').innerText = `${document.getElementById('srcInput').value.length} / 5000`;
         }
 
-        // Placeholder function for image scanning
-        function handleImageScan(input) {
+        // --- REAL PHOTO SCANNER ENGINE (TESSERACT) ---
+        function processImage(input) {
             if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    // In a real app, you would send e.target.result (base64 image) to an OCR API.
-                    // For now, we'll just simulate a successful scan.
-                    document.getElementById('srcInput').value = "[Scanned Text from Image]";
+                const status = document.getElementById('ocrStatus');
+                const srcBox = document.getElementById('srcInput');
+                
+                // Show loading status
+                status.style.display = 'block';
+                srcBox.placeholder = "Processing image logic...";
+
+                Tesseract.recognize(
+                    input.files[0],
+                    'eng', // Scanning for English Text
+                    { logger: m => console.log(m) }
+                ).then(({ data: { text } }) => {
+                    srcBox.value = text;
+                    status.style.display = 'none';
                     updateCounter();
-                    alert("Image scanned successfully! (Simulated)");
-                }
-                reader.readAsDataURL(input.files[0]);
+                    alert("Scan Complete!");
+                }).catch(err => {
+                    status.innerText = "SCAN FAILED";
+                    alert("Could not read image. Try a clearer photo.");
+                });
             }
         }
 
+        // --- TRANSLATION ENGINE ---
+        async function doTranslate() {
+            const txt = document.getElementById('srcInput').value.trim();
+            // Split value to get just the Language Code (e.g., 'ml')
+            const rawVal = document.getElementById('userLang').value;
+            const langCode = rawVal.split('|')[0]; 
+            const out = document.getElementById('targetOut');
+
+            if(!txt) return;
+            out.style.opacity = '0.5';
+            out.innerText = "Processing...";
+
+            try {
+                // High-Performance Fetch
+                const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(txt)}&langpair=en|${langCode}`);
+                const data = await res.json();
+                
+                // Clean up the output
+                if(data.responseData.translatedText) {
+                    out.innerText = data.responseData.translatedText;
+                } else {
+                    out.innerText = "Translation limit reached or connection error.";
+                }
+            } catch(e) { 
+                out.innerText = "Error: Offline or Server Blocked"; 
+            }
+            out.style.opacity = '1';
+        }
+
+        // --- VOICE ENGINE ---
+        function doVoice() {
+            const txt = document.getElementById('targetOut').innerText;
+            // Get the Voice Name from the second part of the value (e.g., 'Malayalam Male')
+            const rawVal = document.getElementById('userLang').value;
+            const voiceName = rawVal.split('|')[1];
+
+            if(window.responsiveVoice) {
+                responsiveVoice.speak(txt, voiceName);
+            } else {
+                alert("Voice engine loading...");
+            }
+        }
+
+        // --- UTILS ---
         function doCopy() {
             navigator.clipboard.writeText(document.getElementById('targetOut').innerText);
-            alert("Copied to clipboard!");
+            alert("Copied!");
         }
 
         function doClear() {
@@ -125,37 +212,13 @@
             updateCounter();
         }
 
-        async function doTranslate() {
-            const txt = document.getElementById('srcInput').value.trim();
-            // Get the language code directly from the select value
-            const lang = document.getElementById('userLang').value;
-            const out = document.getElementById('targetOut');
-
-            if(!txt) return;
-            out.innerText = "Translating...";
-
-            try {
-                const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(txt)}&langpair=en|${lang}`);
-                const data = await res.json();
-                out.innerText = data.responseData.translatedText;
-            } catch(e) { out.innerText = "Error: Check Connection"; }
-        }
-
-        function doVoice() {
-            const txt = document.getElementById('targetOut').innerText;
-            // ResponsiveVoice needs the full name, not the code. Map codes to names.
-            const langMap = { 'ml': 'Malayalam Male', 'hi': 'Hindi Female', 'ta': 'Tamil Male' };
-            const voice = langMap[document.getElementById('userLang').value];
-            responsiveVoice.speak(txt, voice);
-        }
-
         async function doPDF() {
             const { jsPDF } = window.jspdf;
             const canvas = await html2canvas(document.getElementById('outCard'), { backgroundColor: '#161b22' });
             const doc = new jsPDF();
-            doc.text("JM PRIME Export", 15, 15);
+            doc.text("JM PRIME | Translation Record", 15, 15);
             doc.addImage(canvas.toDataURL('image/png'), 'PNG', 15, 25, 180, 0);
-            doc.save("JM_PRIME.pdf");
+            doc.save("JM_PRIME_Session.pdf");
         }
     </script>
 </body>
