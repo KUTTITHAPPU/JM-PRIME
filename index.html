@@ -43,6 +43,9 @@
         .bottom-nav { position: fixed; bottom: 25px; left: 15px; right: 15px; background: #161b22; padding: 10px; border-radius: 25px; display: flex; gap: 8px; border: 1px solid #30363d; z-index: 1000; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
         .nav-btn { flex: 1; height: 52px; border-radius: 18px; border: none; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .btn-main { flex: 2.5; background: var(--primary); font-weight: bold; font-size: 16px; letter-spacing: 1px; }
+        
+        /* Hidden file input for scanner */
+        #scanInput { display: none; }
     </style>
 </head>
 <body>
@@ -61,14 +64,15 @@
     </header>
 
     <select id="userLang" class="lang-select">
-        <option value="Malayalam Female">Malayalam (മലയാളം)</option>
-        <option value="Hindi Female">Hindi (हिन्दी)</option>
-        <option value="Tamil Female">Tamil (தமிழ்)</option>
+        <option value="ml">Malayalam (മലയാളം)</option>
+        <option value="hi">Hindi (हिन्दी)</option>
+        <option value="ta">Tamil (தமிழ்)</option>
     </select>
 
     <div class="glass-card">
         <div class="card-actions">
-            <button class="mini-btn" title="Photo Scanner">📷</button>
+            <input type="file" id="scanInput" accept="image/*" onchange="handleImageScan(this)">
+            <button class="mini-btn" title="Photo Scanner" onclick="document.getElementById('scanInput').click()">📷</button>
             <button class="mini-btn" onclick="doClear()">CLEAR</button>
         </div>
         <span class="label">English Source</span>
@@ -95,6 +99,21 @@
             document.getElementById('counter').innerText = `${document.getElementById('srcInput').value.length} / 5000`;
         }
 
+        // Placeholder function for image scanning
+        function handleImageScan(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // In a real app, you would send e.target.result (base64 image) to an OCR API.
+                    // For now, we'll just simulate a successful scan.
+                    document.getElementById('srcInput').value = "[Scanned Text from Image]";
+                    updateCounter();
+                    alert("Image scanned successfully! (Simulated)");
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
         function doCopy() {
             navigator.clipboard.writeText(document.getElementById('targetOut').innerText);
             alert("Copied to clipboard!");
@@ -108,7 +127,8 @@
 
         async function doTranslate() {
             const txt = document.getElementById('srcInput').value.trim();
-            const lang = document.getElementById('userLang').value.split(' ')[0].toLowerCase().substring(0, 2);
+            // Get the language code directly from the select value
+            const lang = document.getElementById('userLang').value;
             const out = document.getElementById('targetOut');
 
             if(!txt) return;
@@ -123,7 +143,9 @@
 
         function doVoice() {
             const txt = document.getElementById('targetOut').innerText;
-            const voice = document.getElementById('userLang').value;
+            // ResponsiveVoice needs the full name, not the code. Map codes to names.
+            const langMap = { 'ml': 'Malayalam Male', 'hi': 'Hindi Female', 'ta': 'Tamil Male' };
+            const voice = langMap[document.getElementById('userLang').value];
             responsiveVoice.speak(txt, voice);
         }
 
