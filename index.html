@@ -3,24 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>JM PRIME | Neural Engine</title>
+    <title>JM PRIME | Precision Translation</title>
     
     <script src="https://code.responsivevoice.org/responsivevoice.js?key=YOUR_FREE_KEY"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
-        :root { --primary: #007AFF; --bg: #0d1117; --card: #161b22; --text: #f0f6fc; --accent: #007AFF; }
+        :root { --primary: #007AFF; --bg: #0d1117; --card: #161b22; --text: #f0f6fc; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Inter', -apple-system, sans-serif; }
         body { background: var(--bg); margin: 0; padding: 20px; color: var(--text); padding-bottom: 140px; }
 
-        /* --- JM PRIME LOGO SPLASH --- */
-        #splash { position: fixed; inset: 0; background: #070a13; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
-        .seal-container { position: relative; width: 140px; height: 140px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .seal-outer { position: absolute; width: 120px; height: 120px; border: 2px dashed #8b949e; border-radius: 50%; transition: 0.8s ease; }
-        .seal-inner { width: 60px; height: 60px; background: var(--primary); clip-path: circle(50% at 50% 50%); transition: 0.6s ease; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; letter-spacing: -1px; }
-        .active .seal-outer { transform: rotate(360deg); border-style: solid; border-color: var(--primary); }
-        .active .seal-inner { transform: rotate(-360deg) scale(1.1); background: var(--primary); box-shadow: 0 0 20px rgba(0, 122, 255, 0.5); }
+        /* --- ZOOM-IN LOGO SPLASH --- */
+        #splash { position: fixed; inset: 0; background: #070a13; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .seal-container { position: relative; width: 150px; height: 150px; display: flex; align-items: center; justify-content: center; cursor: pointer; animation: breathe 3s infinite ease-in-out; }
+        .seal-outer { position: absolute; width: 130px; height: 130px; border: 2px solid var(--primary); border-radius: 50%; opacity: 0.5; }
+        .seal-inner { width: 70px; height: 70px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 24px; box-shadow: 0 0 30px rgba(0, 122, 255, 0.4); }
+        
+        @keyframes breathe {
+            0%, 100% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+
+        /* --- CENTERED HEADER --- */
+        header { text-align: center; margin-bottom: 30px; }
+        .brand-title { font-size: 28px; font-weight: 900; letter-spacing: 2px; margin: 0; }
+        .brand-prime { font-weight: 200; color: var(--primary); letter-spacing: 6px; margin-left: 5px; }
 
         /* --- INTERFACE --- */
         .glass-card { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 15px; border: 1px solid #30363d; position: relative; }
@@ -32,143 +40,100 @@
 
         .lang-select { width:100%; padding:15px; border-radius:12px; background:var(--card); border: 1px solid #30363d; color:var(--text); font-weight:bold; margin-bottom:15px; appearance: none; font-size: 16px; border-left: 4px solid var(--primary); }
 
-        /* --- LOADING SHIMMER --- */
-        .shimmer { display: none; height: 20px; background: linear-gradient(90deg, #161b22 25%, #21262d 50%, #161b22 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px; width: 60%; margin-top: 10px; }
-        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-
         .bottom-nav { position: fixed; bottom: 25px; left: 15px; right: 15px; background: #161b22; padding: 10px; border-radius: 25px; display: flex; gap: 8px; border: 1px solid #30363d; z-index: 1000; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
         .nav-btn { flex: 1; height: 52px; border-radius: 18px; border: none; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .btn-main { flex: 2.5; background: var(--primary); font-weight: bold; font-size: 14px; letter-spacing: 2px; }
-        .is-speaking { background: #e11d48 !important; box-shadow: 0 0 15px rgba(225, 29, 72, 0.4); }
+        .btn-main { flex: 2.5; background: var(--primary); font-weight: bold; font-size: 16px; letter-spacing: 1px; }
     </style>
 </head>
 <body>
 
-    <div id="splash">
-        <div class="seal-container" onclick="unlock(this)">
+    <div id="splash" onclick="this.style.display='none'">
+        <div class="seal-container">
             <div class="seal-outer"></div>
             <div class="seal-inner">JM</div>
         </div>
-        <div style="margin-top:20px; color:#8b949e; letter-spacing:5px; font-size:10px; font-weight:900;">NEURAL ENGINE READY</div>
+        <div style="margin-top:20px; color:#8b949e; letter-spacing:5px; font-size:10px; font-weight:900;">CLICK TO INITIALIZE</div>
     </div>
 
-    <header style="margin-bottom:20px; display: flex; justify-content: space-between; align-items: flex-end;">
-        <h2 style="margin:0; font-size: 24px; font-weight: 900; letter-spacing: 1px;">JM <span style="font-weight:200; color:var(--primary); letter-spacing:5px;">PRIME</span></h2>
-        <div id="counter" style="font-size: 10px; color: #8b949e; font-weight: bold;">0 / 5000</div>
+    <header>
+        <h1 class="brand-title">JM<span class="brand-prime">PRIME</span></h1>
+        <div id="counter" style="font-size: 10px; color: #8b949e; font-weight: bold; margin-top: 5px;">0 / 5000</div>
     </header>
 
     <select id="userLang" class="lang-select">
-        <option value="Hindi Female">Hindi (हिन्दी) — Neural</option>
-        <option value="Malayalam Female">Malayalam (മലയാളം) — Neural</option>
-        <option value="Tamil Female">Tamil (தமிழ்) — Neural</option>
-        <option value="Bengali Female">Bengali (বাংলা) — Neural</option>
+        <option value="Malayalam Female">Malayalam (മലയാളം)</option>
+        <option value="Hindi Female">Hindi (हिन्दी)</option>
+        <option value="Tamil Female">Tamil (தமிழ்)</option>
     </select>
 
     <div class="glass-card">
         <div class="card-actions">
-            <button class="mini-btn" onclick="doPaste()">PASTE</button>
+            <button class="mini-btn" title="Photo Scanner">📷</button>
             <button class="mini-btn" onclick="doClear()">CLEAR</button>
         </div>
-        <span class="label">EN Source Node</span>
-        <textarea id="srcInput" oninput="updateCounter()" placeholder="Awaiting input..."></textarea>
+        <span class="label">English Source</span>
+        <textarea id="srcInput" oninput="updateCounter()" placeholder="Enter text to translate..."></textarea>
     </div>
 
     <div class="glass-card" id="outCard">
         <div class="card-actions">
             <button class="mini-btn" onclick="doCopy()">COPY</button>
-            <button class="mini-btn" id="voiceBtn" onclick="doVoice()">LISTEN 🔊</button>
+            <button class="mini-btn" id="voiceBtn" onclick="doVoice()">🔊</button>
         </div>
-        <span class="label">Neural Output Bridge</span>
-        <div id="shimmer" class="shimmer"></div>
-        <div id="targetOut" style="font-size:21px; min-height:50px; color:var(--primary); font-weight:600; line-height:1.5;">...</div>
+        <span class="label">Translation Output</span>
+        <div id="targetOut" style="font-size:21px; min-height:50px; color:var(--primary); font-weight:600;">...</div>
     </div>
 
     <div class="bottom-nav">
         <button class="nav-btn" onclick="location.reload()">🔄</button>
-        <button class="nav-btn btn-main" onclick="doTranslate()">EXECUTE BRIDGE</button>
+        <button class="nav-btn btn-main" onclick="doTranslate()">TRANSLATE</button>
         <button class="nav-btn" onclick="doPDF()">📥</button>
     </div>
 
     <script>
-        // JS logic remains identical to your original GenLingo structure
-        function unlock(el) {
-            el.classList.add('active');
-            if(navigator.vibrate) navigator.vibrate(40);
-            setTimeout(() => {
-                const s = document.getElementById('splash');
-                s.style.opacity = '0';
-                s.style.transform = 'scale(1.1)';
-                setTimeout(() => s.style.display = 'none', 600);
-            }, 800);
-        }
-
         function updateCounter() {
             document.getElementById('counter').innerText = `${document.getElementById('srcInput').value.length} / 5000`;
         }
 
-        async function doPaste() {
-            document.getElementById('srcInput').value = await navigator.clipboard.readText();
-            updateCounter();
-        }
-
         function doCopy() {
             navigator.clipboard.writeText(document.getElementById('targetOut').innerText);
-            alert("Protocol Copied!");
+            alert("Copied to clipboard!");
         }
 
         function doClear() {
             document.getElementById('srcInput').value = "";
             document.getElementById('targetOut').innerText = "...";
-            responsiveVoice.cancel();
             updateCounter();
         }
 
         async function doTranslate() {
             const txt = document.getElementById('srcInput').value.trim();
-            const voice = document.getElementById('userLang').value;
-            const lang = voice.split(' ')[0].toLowerCase().substring(0, 2);
+            const lang = document.getElementById('userLang').value.split(' ')[0].toLowerCase().substring(0, 2);
             const out = document.getElementById('targetOut');
-            const shim = document.getElementById('shimmer');
 
             if(!txt) return;
-            out.style.display = 'none';
-            shim.style.display = 'block';
+            out.innerText = "Translating...";
 
             try {
-                const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(txt)}&langpair=en|${lang}&de=pro_fluent@jmprime.com`);
+                const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(txt)}&langpair=en|${lang}`);
                 const data = await res.json();
                 out.innerText = data.responseData.translatedText;
-            } catch(e) { out.innerText = "Error: Core Sync Failed"; }
-
-            shim.style.display = 'none';
-            out.style.display = 'block';
+            } catch(e) { out.innerText = "Error: Check Connection"; }
         }
 
         function doVoice() {
-            const btn = document.getElementById('voiceBtn');
             const txt = document.getElementById('targetOut').innerText;
             const voice = document.getElementById('userLang').value;
-
-            if (responsiveVoice.isPlaying()) {
-                responsiveVoice.cancel();
-                btn.classList.remove('is-speaking');
-                btn.innerText = "LISTEN 🔊";
-            } else {
-                responsiveVoice.speak(txt, voice, {
-                    rate: 0.95,
-                    onstart: () => { btn.classList.add('is-speaking'); btn.innerText = "STOP 🛑"; },
-                    onend: () => { btn.classList.remove('is-speaking'); btn.innerText = "LISTEN 🔊"; }
-                });
-            }
+            responsiveVoice.speak(txt, voice);
         }
 
         async function doPDF() {
             const { jsPDF } = window.jspdf;
-            const canvas = await html2canvas(document.getElementById('outCard'), { backgroundColor: '#161b22', scale: 2 });
+            const canvas = await html2canvas(document.getElementById('outCard'), { backgroundColor: '#161b22' });
             const doc = new jsPDF();
-            doc.text("JM PRIME Neural Export", 15, 15);
+            doc.text("JM PRIME Export", 15, 15);
             doc.addImage(canvas.toDataURL('image/png'), 'PNG', 15, 25, 180, 0);
-            doc.save("JM_PRIME_LOG.pdf");
+            doc.save("JM_PRIME.pdf");
         }
     </script>
 </body>
