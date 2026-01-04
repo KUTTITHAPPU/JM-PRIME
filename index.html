@@ -11,27 +11,60 @@
     <script src='https://unpkg.com/tesseract.js@v2.1.0/dist/tesseract.min.js'></script>
 
     <style>
-        :root { --primary: #007AFF; --bg: #0d1117; --card: #161b22; --text: #f0f6fc; }
+        :root { --primary: #007AFF; --bg: #0d1117; --card: #161b22; --text: #f0f6fc; --glow: rgba(0, 122, 255, 0.5); }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Inter', -apple-system, sans-serif; }
-        body { background: var(--bg); margin: 0; padding: 20px; color: var(--text); padding-bottom: 140px; }
+        body { background: var(--bg); margin: 0; padding: 20px; color: var(--text); padding-bottom: 140px; overflow-x: hidden; }
 
-        /* --- ZOOM-IN LOGO SPLASH --- */
-        #splash { position: fixed; inset: 0; background: #070a13; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease; }
-        .seal-container { position: relative; width: 150px; height: 150px; display: flex; align-items: center; justify-content: center; cursor: pointer; animation: breathe 3s infinite ease-in-out; }
-        .seal-outer { position: absolute; width: 130px; height: 130px; border: 2px solid var(--primary); border-radius: 50%; opacity: 0.5; }
-        .seal-inner { width: 70px; height: 70px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 24px; box-shadow: 0 0 30px rgba(0, 122, 255, 0.4); }
-        
-        @keyframes breathe {
-            0%, 100% { transform: scale(0.95); opacity: 0.8; }
-            50% { transform: scale(1.1); opacity: 1; }
+        /* --- SPECIAL ENGINE LOADING ANIMATION --- */
+        #engine-loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #070a13; z-index: 10000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.8s ease-out;
         }
+        .engine-core-container { position: relative; width: 200px; height: 200px; display: flex; align-items: center; justify-content: center; }
+        
+        /* The central spinning gear */
+        .engine-gear {
+            position: absolute; width: 100px; height: 100px;
+            border: 4px dashed var(--primary); border-radius: 50%;
+            animation: spin-gear 8s linear infinite; box-shadow: 0 0 20px var(--glow);
+        }
+        /* The pulsing energy rings */
+        .energy-ring {
+            position: absolute; border-radius: 50%; border: 2px solid var(--primary);
+            opacity: 0; animation: pulse-ring 3s ease-out infinite;
+        }
+        .ring-1 { width: 120px; height: 120px; animation-delay: 0s; }
+        .ring-2 { width: 160px; height: 160px; animation-delay: 0.6s; }
+        .ring-3 { width: 200px; height: 200px; animation-delay: 1.2s; }
 
-        /* --- HEADER --- */
+        /* The JM Core Text */
+        .engine-text { font-size: 24px; font-weight: 900; color: white; z-index: 10; text-shadow: 0 0 15px var(--primary); }
+
+        /* Loading Status Text */
+        .loading-status {
+            margin-top: 40px; font-size: 12px; letter-spacing: 3px; color: #8b949e; font-weight: bold; text-transform: uppercase;
+            animation: fade-text 2s infinite alternate;
+        }
+        
+        @keyframes spin-gear { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes pulse-ring { 0% { transform: scale(0.8); opacity: 0.8; } 100% { transform: scale(1.5); opacity: 0; } }
+        @keyframes fade-text { from { opacity: 0.4; } to { opacity: 1; } }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 200px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 4px; margin-top: 20px; overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%; background: var(--primary); width: 0%; border-radius: 4px;
+            box-shadow: 0 0 10px var(--glow); animation: load-progress 4s ease-in-out forwards;
+        }
+        @keyframes load-progress { 0% { width: 0%; } 100% { width: 100%; } }
+
+        /* --- MAIN APP STYLES --- */
         header { text-align: center; margin-bottom: 30px; }
         .brand-title { font-size: 28px; font-weight: 900; letter-spacing: 2px; margin: 0; }
         .brand-prime { font-weight: 200; color: var(--primary); letter-spacing: 6px; margin-left: 5px; }
 
-        /* --- INTERFACE --- */
         .glass-card { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 15px; border: 1px solid #30363d; position: relative; transition: border 0.3s; }
         .glass-card:focus-within { border-color: var(--primary); }
         
@@ -50,20 +83,24 @@
         .btn-main { flex: 2.5; background: var(--primary); font-weight: bold; font-size: 16px; letter-spacing: 1px; }
         
         #scanInput { display: none; }
-        
-        /* Status Bar for OCR */
         #ocrStatus { display: none; font-size: 12px; color: var(--primary); text-align: center; margin-bottom: 10px; font-weight: bold; animation: pulse 1s infinite; }
         @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
     </style>
 </head>
 <body>
 
-    <div id="splash" onclick="dismissSplash()">
-        <div class="seal-container">
-            <div class="seal-outer"></div>
-            <div class="seal-inner">JM</div>
+    <div id="engine-loader">
+        <div class="engine-core-container">
+            <div class="engine-gear"></div>
+            <div class="energy-ring ring-1"></div>
+            <div class="energy-ring ring-2"></div>
+            <div class="energy-ring ring-3"></div>
+            <div class="engine-text">JM</div>
         </div>
-        <div style="margin-top:20px; color:#8b949e; letter-spacing:5px; font-size:10px; font-weight:900;">SYSTEM READY</div>
+        <div class="progress-container">
+            <div class="progress-bar"></div>
+        </div>
+        <div class="loading-status" id="loading-text">INITIALIZING CORE SYSTEMS...</div>
     </div>
 
     <header>
@@ -119,88 +156,64 @@
     </div>
 
     <script>
-        // Dismiss Splash
-        function dismissSplash() {
-            const s = document.getElementById('splash');
-            s.style.opacity = '0';
-            setTimeout(() => s.style.display = 'none', 500);
-        }
+        // ENGINE LOADER LOGIC
+        window.addEventListener('load', () => {
+            const loader = document.getElementById('engine-loader');
+            const text = document.getElementById('loading-text');
+            
+            // Simulate loading sequence
+            setTimeout(() => text.innerText = "SYNCING LANGUAGE VAULT...", 1500);
+            setTimeout(() => text.innerText = "OPTIMIZING OCR ENGINE...", 3000);
+            
+            // Dismiss after 4 seconds
+            setTimeout(() => {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 800);
+            }, 4000);
+        });
 
-        // Character Counter
+        // App Functions
         function updateCounter() {
             document.getElementById('counter').innerText = `${document.getElementById('srcInput').value.length} / 5000`;
         }
 
-        // --- REAL PHOTO SCANNER ENGINE (TESSERACT) ---
         function processImage(input) {
             if (input.files && input.files[0]) {
                 const status = document.getElementById('ocrStatus');
                 const srcBox = document.getElementById('srcInput');
-                
-                // Show loading status
                 status.style.display = 'block';
                 srcBox.placeholder = "Processing image logic...";
-
-                Tesseract.recognize(
-                    input.files[0],
-                    'eng', // Scanning for English Text
-                    { logger: m => console.log(m) }
-                ).then(({ data: { text } }) => {
+                Tesseract.recognize(input.files[0], 'eng').then(({ data: { text } }) => {
                     srcBox.value = text;
                     status.style.display = 'none';
                     updateCounter();
-                    alert("Scan Complete!");
                 }).catch(err => {
                     status.innerText = "SCAN FAILED";
-                    alert("Could not read image. Try a clearer photo.");
                 });
             }
         }
 
-        // --- TRANSLATION ENGINE ---
         async function doTranslate() {
             const txt = document.getElementById('srcInput').value.trim();
-            // Split value to get just the Language Code (e.g., 'ml')
-            const rawVal = document.getElementById('userLang').value;
-            const langCode = rawVal.split('|')[0]; 
+            const langCode = document.getElementById('userLang').value.split('|')[0]; 
             const out = document.getElementById('targetOut');
-
             if(!txt) return;
             out.style.opacity = '0.5';
             out.innerText = "Processing...";
-
             try {
-                // High-Performance Fetch
                 const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(txt)}&langpair=en|${langCode}`);
                 const data = await res.json();
-                
-                // Clean up the output
-                if(data.responseData.translatedText) {
-                    out.innerText = data.responseData.translatedText;
-                } else {
-                    out.innerText = "Translation limit reached or connection error.";
-                }
-            } catch(e) { 
-                out.innerText = "Error: Offline or Server Blocked"; 
-            }
+                out.innerText = data.responseData.translatedText || "Translation limit reached.";
+            } catch(e) { out.innerText = "Error: Offline or Server Blocked"; }
             out.style.opacity = '1';
         }
 
-        // --- VOICE ENGINE ---
         function doVoice() {
             const txt = document.getElementById('targetOut').innerText;
-            // Get the Voice Name from the second part of the value (e.g., 'Malayalam Male')
-            const rawVal = document.getElementById('userLang').value;
-            const voiceName = rawVal.split('|')[1];
-
-            if(window.responsiveVoice) {
-                responsiveVoice.speak(txt, voiceName);
-            } else {
-                alert("Voice engine loading...");
-            }
+            const voiceName = document.getElementById('userLang').value.split('|')[1];
+            if(window.responsiveVoice) responsiveVoice.speak(txt, voiceName);
         }
 
-        // --- UTILS ---
         function doCopy() {
             navigator.clipboard.writeText(document.getElementById('targetOut').innerText);
             alert("Copied!");
