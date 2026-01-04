@@ -5,86 +5,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>JM PRIME | Universal Translator</title>
     
-    <script src="https://code.responsivevoice.org/responsivevoice.js?key=YOUR_FREE_KEY"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src='https://unpkg.com/tesseract.js@v2.1.0/dist/tesseract.min.js'></script>
+    <script src="https://code.responsivevoice.org/responsivevoice.js?key=7wJ0Z9X4"></script>
 
     <style>
         :root { --primary: #007AFF; --bg: #0d1117; --card: #161b22; --text: #f0f6fc; --glow: rgba(0, 122, 255, 0.5); }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Inter', -apple-system, sans-serif; }
         body { background: var(--bg); margin: 0; padding: 20px; color: var(--text); padding-bottom: 140px; overflow-x: hidden; }
 
-        /* --- SPECIAL ENGINE LOADING ANIMATION --- */
+        /* --- ADVANCED ENGINE LOADING ANIMATION --- */
         #engine-loader {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #070a13; z-index: 10000;
             display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.8s ease-out;
         }
         .engine-core-container { position: relative; width: 200px; height: 200px; display: flex; align-items: center; justify-content: center; }
-        
-        /* The central spinning gear */
         .engine-gear {
             position: absolute; width: 100px; height: 100px;
             border: 4px dashed var(--primary); border-radius: 50%;
             animation: spin-gear 8s linear infinite; box-shadow: 0 0 20px var(--glow);
         }
-        /* The pulsing energy rings */
-        .energy-ring {
-            position: absolute; border-radius: 50%; border: 2px solid var(--primary);
-            opacity: 0; animation: pulse-ring 3s ease-out infinite;
-        }
+        .energy-ring { position: absolute; border-radius: 50%; border: 2px solid var(--primary); opacity: 0; animation: pulse-ring 3s ease-out infinite; }
         .ring-1 { width: 120px; height: 120px; animation-delay: 0s; }
         .ring-2 { width: 160px; height: 160px; animation-delay: 0.6s; }
-        .ring-3 { width: 200px; height: 200px; animation-delay: 1.2s; }
-
-        /* The JM Core Text */
         .engine-text { font-size: 24px; font-weight: 900; color: white; z-index: 10; text-shadow: 0 0 15px var(--primary); }
-
-        /* Loading Status Text */
-        .loading-status {
-            margin-top: 40px; font-size: 12px; letter-spacing: 3px; color: #8b949e; font-weight: bold; text-transform: uppercase;
-            animation: fade-text 2s infinite alternate;
-        }
+        .loading-status { margin-top: 40px; font-size: 10px; letter-spacing: 3px; color: #8b949e; font-weight: bold; animation: fade-text 2s infinite alternate; }
+        .progress-container { width: 200px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 4px; margin-top: 20px; overflow: hidden; }
+        .progress-bar { height: 100%; background: var(--primary); width: 0%; border-radius: 4px; animation: load-progress 4s ease-in-out forwards; }
         
         @keyframes spin-gear { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes pulse-ring { 0% { transform: scale(0.8); opacity: 0.8; } 100% { transform: scale(1.5); opacity: 0; } }
         @keyframes fade-text { from { opacity: 0.4; } to { opacity: 1; } }
-
-        /* Progress Bar */
-        .progress-container {
-            width: 200px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 4px; margin-top: 20px; overflow: hidden;
-        }
-        .progress-bar {
-            height: 100%; background: var(--primary); width: 0%; border-radius: 4px;
-            box-shadow: 0 0 10px var(--glow); animation: load-progress 4s ease-in-out forwards;
-        }
         @keyframes load-progress { 0% { width: 0%; } 100% { width: 100%; } }
 
-        /* --- MAIN APP STYLES --- */
+        /* --- APP STRUCTURE --- */
         header { text-align: center; margin-bottom: 30px; }
         .brand-title { font-size: 28px; font-weight: 900; letter-spacing: 2px; margin: 0; }
         .brand-prime { font-weight: 200; color: var(--primary); letter-spacing: 6px; margin-left: 5px; }
 
-        .glass-card { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 15px; border: 1px solid #30363d; position: relative; transition: border 0.3s; }
-        .glass-card:focus-within { border-color: var(--primary); }
-        
+        .glass-card { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 15px; border: 1px solid #30363d; position: relative; }
         .label { font-size: 10px; font-weight: 800; color: #8b949e; text-transform: uppercase; margin-bottom: 10px; display: block; letter-spacing: 2px; }
         textarea { width: 100%; height: 110px; border: none; font-size: 19px; background: transparent; outline: none; resize: none; color: var(--text); line-height: 1.5; }
         
         .card-actions { position: absolute; top: 18px; right: 18px; display: flex; gap: 8px; }
-        .mini-btn { background: #30363d; border: none; border-radius: 8px; padding: 6px 12px; color: #c9d1d9; font-size: 10px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .mini-btn:active { transform: scale(0.95); background: var(--primary); color: white; }
+        .mini-btn { background: #30363d; border: none; border-radius: 8px; padding: 6px 12px; color: #c9d1d9; font-size: 10px; font-weight: bold; cursor: pointer; }
 
         .lang-select { width:100%; padding:15px; border-radius:12px; background:var(--card); border: 1px solid #30363d; color:var(--text); font-weight:bold; margin-bottom:15px; appearance: none; font-size: 16px; border-left: 4px solid var(--primary); outline: none; }
 
         .bottom-nav { position: fixed; bottom: 25px; left: 15px; right: 15px; background: #161b22; padding: 10px; border-radius: 25px; display: flex; gap: 8px; border: 1px solid #30363d; z-index: 1000; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
-        .nav-btn { flex: 1; height: 52px; border-radius: 18px; border: none; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
-        .nav-btn:active { transform: scale(0.90); }
+        .nav-btn { flex: 1; height: 52px; border-radius: 18px; border: none; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .btn-main { flex: 2.5; background: var(--primary); font-weight: bold; font-size: 16px; letter-spacing: 1px; }
         
         #scanInput { display: none; }
-        #ocrStatus { display: none; font-size: 12px; color: var(--primary); text-align: center; margin-bottom: 10px; font-weight: bold; animation: pulse 1s infinite; }
-        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+        #ocrStatus { display: none; font-size: 12px; color: var(--primary); text-align: center; margin-bottom: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -94,12 +68,9 @@
             <div class="engine-gear"></div>
             <div class="energy-ring ring-1"></div>
             <div class="energy-ring ring-2"></div>
-            <div class="energy-ring ring-3"></div>
             <div class="engine-text">JM</div>
         </div>
-        <div class="progress-container">
-            <div class="progress-bar"></div>
-        </div>
+        <div class="progress-container"><div class="progress-bar"></div></div>
         <div class="loading-status" id="loading-text">INITIALIZING CORE SYSTEMS...</div>
     </div>
 
@@ -110,34 +81,26 @@
 
     <select id="userLang" class="lang-select">
         <optgroup label="Indian Languages">
-            <option value="ml|Malayalam Male">Malayalam (മലയാളം)</option>
+            <option value="ml|Malayalam Female">Malayalam (മലയാളം)</option>
             <option value="hi|Hindi Female">Hindi (हिन्दी)</option>
-            <option value="ta|Tamil Male">Tamil (தமிழ்)</option>
-            <option value="bn|Bengali India Female">Bengali (বাংলা)</option>
-            <option value="gu|Gujarati Female">Gujarati (ગુજરાતી)</option>
-            <option value="kn|Kannada Female">Kannada (ಕನ್ನಡ)</option>
-            <option value="te|Telugu Female">Telugu (తెలుగు)</option>
+            <option value="ta|Tamil Female">Tamil (தமிழ்)</option>
         </optgroup>
         <optgroup label="Global Languages">
-            <option value="es|Spanish Latin American Female">Spanish (Español)</option>
+            <option value="es|Spanish Female">Spanish (Español)</option>
             <option value="fr|French Female">French (Français)</option>
-            <option value="de|Deutsch Female">German (Deutsch)</option>
-            <option value="zh-CN|Chinese Female">Chinese (中文)</option>
             <option value="ar|Arabic Male">Arabic (العربية)</option>
-            <option value="ru|Russian Female">Russian (Русский)</option>
-            <option value="ja|Japanese Female">Japanese (日本語)</option>
         </optgroup>
     </select>
 
     <div class="glass-card">
-        <div id="ocrStatus">SCANNING IMAGE... PLEASE WAIT</div>
+        <div id="ocrStatus">SCANNING IMAGE...</div>
         <div class="card-actions">
             <input type="file" id="scanInput" accept="image/*" onchange="processImage(this)">
-            <button class="mini-btn" title="Photo Scanner" onclick="document.getElementById('scanInput').click()">📷</button>
+            <button class="mini-btn" onclick="document.getElementById('scanInput').click()">📷</button>
             <button class="mini-btn" onclick="doClear()">CLEAR</button>
         </div>
         <span class="label">English Source</span>
-        <textarea id="srcInput" oninput="updateCounter()" placeholder="Type here or scan an image..."></textarea>
+        <textarea id="srcInput" oninput="updateCounter()" placeholder="Type or scan..."></textarea>
     </div>
 
     <div class="glass-card" id="outCard">
@@ -156,62 +119,62 @@
     </div>
 
     <script>
-        // ENGINE LOADER LOGIC
+        // Engine Loader Logic
         window.addEventListener('load', () => {
             const loader = document.getElementById('engine-loader');
             const text = document.getElementById('loading-text');
-            
-            // Simulate loading sequence
             setTimeout(() => text.innerText = "SYNCING LANGUAGE VAULT...", 1500);
-            setTimeout(() => text.innerText = "OPTIMIZING OCR ENGINE...", 3000);
-            
-            // Dismiss after 4 seconds
+            setTimeout(() => text.innerText = "OPTIMIZING AUDIO CORE...", 3000);
             setTimeout(() => {
                 loader.style.opacity = '0';
                 setTimeout(() => loader.style.display = 'none', 800);
             }, 4000);
         });
 
-        // App Functions
+        // CHARACTER COUNTER
         function updateCounter() {
             document.getElementById('counter').innerText = `${document.getElementById('srcInput').value.length} / 5000`;
         }
 
+        // PHOTO SCANNER (Tesseract.js)
         function processImage(input) {
             if (input.files && input.files[0]) {
                 const status = document.getElementById('ocrStatus');
-                const srcBox = document.getElementById('srcInput');
                 status.style.display = 'block';
-                srcBox.placeholder = "Processing image logic...";
                 Tesseract.recognize(input.files[0], 'eng').then(({ data: { text } }) => {
-                    srcBox.value = text;
+                    document.getElementById('srcInput').value = text;
                     status.style.display = 'none';
                     updateCounter();
-                }).catch(err => {
-                    status.innerText = "SCAN FAILED";
                 });
             }
         }
 
+        // TRANSLATE ENGINE + AUDIO UNLOCKER
         async function doTranslate() {
+            // UNLOCK AUDIO ENGINE (Crucial for Mobile Speak to work)
+            if(window.responsiveVoice) { responsiveVoice.speak("", "UK English Female"); }
+
             const txt = document.getElementById('srcInput').value.trim();
             const langCode = document.getElementById('userLang').value.split('|')[0]; 
             const out = document.getElementById('targetOut');
+
             if(!txt) return;
-            out.style.opacity = '0.5';
             out.innerText = "Processing...";
+
             try {
                 const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(txt)}&langpair=en|${langCode}`);
                 const data = await res.json();
-                out.innerText = data.responseData.translatedText || "Translation limit reached.";
-            } catch(e) { out.innerText = "Error: Offline or Server Blocked"; }
-            out.style.opacity = '1';
+                out.innerText = data.responseData.translatedText;
+            } catch(e) { out.innerText = "Check connection."; }
         }
 
+        // SPEAK ENGINE
         function doVoice() {
             const txt = document.getElementById('targetOut').innerText;
             const voiceName = document.getElementById('userLang').value.split('|')[1];
-            if(window.responsiveVoice) responsiveVoice.speak(txt, voiceName);
+            if(window.responsiveVoice && txt !== "...") {
+                responsiveVoice.speak(txt, voiceName);
+            }
         }
 
         function doCopy() {
@@ -229,9 +192,9 @@
             const { jsPDF } = window.jspdf;
             const canvas = await html2canvas(document.getElementById('outCard'), { backgroundColor: '#161b22' });
             const doc = new jsPDF();
-            doc.text("JM PRIME | Translation Record", 15, 15);
+            doc.text("JM PRIME Translation", 15, 15);
             doc.addImage(canvas.toDataURL('image/png'), 'PNG', 15, 25, 180, 0);
-            doc.save("JM_PRIME_Session.pdf");
+            doc.save("JM_PRIME.pdf");
         }
     </script>
 </body>
