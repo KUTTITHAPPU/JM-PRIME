@@ -1,16 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-// THE MAIN SCANNER PAGE
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(); // Connects to your Firebase project
+  runApp(MaterialApp(
+    theme: ThemeData(primarySwatch: Colors.blue),
+    home: JmPrimeHome(),
+  ));
+}
+
 class JmPrimeHome extends StatefulWidget {
   @override
   _JmPrimeHomeState createState() => _JmPrimeHomeState();
 }
 
 class _JmPrimeHomeState extends State<JmPrimeHome> {
-  bool isLoggedIn = false; 
+  User? user = FirebaseAuth.instance.currentUser;
 
-  // Function to show the Login Pop-up
-  void _showLoginModal(BuildContext context) {
+  // --- 1. THE LOGIN POP-UP (MODAL) ---
+  void _showLoginPopup(BuildContext context) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -20,16 +31,14 @@ class _JmPrimeHomeState extends State<JmPrimeHome> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text("Login to JM PRIME", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.blue[900])),
-            SizedBox(height: 15),
-            TextField(decoration: InputDecoration(labelText: 'Email', border: OutlineInputBorder())),
-            SizedBox(height: 10),
-            TextField(obscureText: true, decoration: InputDecoration(labelText: 'Password', border: OutlineInputBorder())),
+            Text("Login to JM PRIME", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            TextField(decoration: InputDecoration(labelText: "Email")),
+            TextField(decoration: InputDecoration(labelText: "Password"), obscureText: true),
             SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () { setState(() => isLoggedIn = true); Navigator.pop(context); },
+              onPressed: () { /* Add Firebase Auth logic here */ },
               child: Text("Sign In"),
-              style: ElevatedButton.styleFrom(minimumSize: Size(double.infinity, 50)),
+              style: ElevatedButton.styleFrom(minimumSize: Size(double.infinity, 45)),
             ),
             SizedBox(height: 20),
           ],
@@ -40,39 +49,73 @@ class _JmPrimeHomeState extends State<JmPrimeHome> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("JM PRIME"), backgroundColor: Colors.blue[600]),
+    return Scaffold( // --- 2. THE SCAFFOLD (THE SKELETON) ---
+      appBar: AppBar(
+        title: Text("JM PRIME"),
+        // This ensures the 3-line menu icon is always visible and functional
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: Icon(Icons.menu),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          ),
+        ),
+      ),
       
-      // THE 3-LINE MENU (DRAWER)
+      // --- 3. THE 3-LINE MENU (DRAWER) ---
       drawer: Drawer(
-        child: ListView(
+        child: Column(
           children: [
             UserAccountsDrawerHeader(
-              accountName: Text(isLoggedIn ? "JM PRIME User" : "Guest"),
-              accountEmail: Text(isLoggedIn ? "user@example.com" : "Sign in to save data"),
               currentAccountPicture: CircleAvatar(child: Icon(Icons.person)),
+              accountName: Text(user != null ? "Pro User" : "Guest"),
+              accountEmail: Text(user?.email ?? "Sign in to sync old data"),
             ),
             ListTile(
               leading: Icon(Icons.history, color: Colors.blue),
-              title: Text("History & Old Data"),
+              title: Text("Scan History"),
               onTap: () {
-                if (isLoggedIn) {
-                  // This is how you navigate to the SEPARATE History page
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => HistoryPage()));
-                } else {
-                  _showLoginModal(context);
-                }
+                Navigator.pop(context); // Close menu
+                Navigator.push(context, MaterialPageRoute(builder: (context) => HistoryPage()));
               },
             ),
             ListTile(
-              leading: Icon(Icons.description),
-              title: Text("Export to Word"),
-              onTap: () {},
+              leading: Icon(Icons.table_chart, color: Colors.green),
+              title: Text("Export to Excel"),
+              onTap: () => print("Excel Logic"),
             ),
+            Divider(),
+            if (user == null) 
+              ListTile(leading: Icon(Icons.login), title: Text("Login"), onTap: () => _showLoginPopup(context))
+            else
+              ListTile(leading: Icon(Icons.logout), title: Text("Logout"), onTap: () => FirebaseAuth.instance.signOut()),
           ],
         ),
       ),
-      body: Center(child: Icon(Icons.camera_alt, size: 100, color: Colors.grey)),
+      body: Center(child: Text("Camera Interface Lives Here")),
+    );
+  }
+}
+
+// --- 4. THE HISTORY PAGE (FOR OLD DATA) ---
+class HistoryPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Your Old Data")),
+      body: StreamBuilder(
+        stream: FirebaseFirestore.instance.collection('scans').snapshots(),
+        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
+          return ListView(
+            children: snapshot.data!.docs.map((doc) => ListTile(
+              leading: Icon(Icons.description),
+              title: Text(doc['title'] ?? 'Untitled Scan'),
+              subtitle: Text(doc['date'] ?? 'No date'),
+              onTap: () => print("Opening old scan: ${doc.id}"),
+            )).toList(),
+          );
+        },
+      ),
     );
   }
 }
