@@ -22,7 +22,33 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Inter', sans-serif; }
         body { background: var(--bg); margin: 0; padding: 20px; color: var(--text); padding-bottom: 140px; overflow-x: hidden; }
 
-        /* --- SIDEBAR (THE 3-LINE MENU) --- */
+        /* --- INTRO ANIMATION (SPLASH SCREEN) --- */
+        #splash-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 9999; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; transition: opacity 0.8s ease, visibility 0.8s;
+        }
+        .splash-logo {
+            font-size: 50px; font-weight: 900; color: white; letter-spacing: 5px;
+            animation: pulse-glow 2s infinite alternate;
+        }
+        .splash-prime { color: var(--primary); font-weight: 200; letter-spacing: 12px; }
+        .loading-bar { 
+            width: 150px; height: 2px; background: #333; margin-top: 20px; 
+            position: relative; overflow: hidden; border-radius: 10px;
+        }
+        .loading-progress {
+            position: absolute; width: 0%; height: 100%; background: var(--primary);
+            animation: load-run 2.5s forwards ease-in-out;
+        }
+        @keyframes pulse-glow {
+            from { text-shadow: 0 0 5px #fff, 0 0 10px var(--primary); transform: scale(0.95); }
+            to { text-shadow: 0 0 20px #fff, 0 0 40px var(--primary); transform: scale(1); }
+        }
+        @keyframes load-run { to { width: 100%; } }
+        .fade-out { opacity: 0; visibility: hidden; }
+
+        /* --- SIDEBAR --- */
         #historySidebar {
             position: fixed; left: -310px; top: 0; width: 300px; height: 100%; 
             background: var(--card); z-index: 2000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); padding: 20px;
@@ -30,16 +56,11 @@
             display: flex; flex-direction: column;
         }
         #historySidebar.active { left: 0; }
-        
         .history-list { flex-grow: 1; overflow-y: auto; margin-top: 20px; }
-        
-        .history-item { 
-            padding: 15px; border-bottom: 1px solid #30363d; font-size: 13px; cursor: pointer; 
-            border-radius: 10px; margin-bottom: 8px; transition: 0.2s;
-        }
+        .history-item { padding: 15px; border-bottom: 1px solid #30363d; font-size: 13px; cursor: pointer; border-radius: 10px; margin-bottom: 8px; }
         .history-item:hover { background: #30363d; color: var(--primary); }
 
-        /* --- HEADER & UI --- */
+        /* --- UI ELEMENTS --- */
         .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .menu-btn { font-size: 28px; cursor: pointer; background: none; border: none; color: white; padding: 10px; }
         .brand-title { font-size: 28px; font-weight: 900; letter-spacing: 2px; margin: 0; }
@@ -47,51 +68,31 @@
 
         .glass-card { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 15px; border: 1px solid #30363d; position: relative; }
         .label { font-size: 10px; font-weight: 800; color: #8b949e; text-transform: uppercase; margin-bottom: 10px; display: block; letter-spacing: 2px; }
-        
         textarea { width: 100%; height: 110px; border: none; font-size: 19px; background: transparent; outline: none; resize: none; color: var(--text); line-height: 1.5; }
         
         .card-actions { position: absolute; top: 18px; right: 18px; display: flex; gap: 8px; }
-        
-        .mini-btn { 
-            background: #30363d; border: none; border-radius: 8px; padding: 6px 12px; 
-            color: #c9d1d9; font-size: 10px; font-weight: bold; cursor: pointer; 
-        }
+        .mini-btn { background: #30363d; border: none; border-radius: 8px; padding: 6px 12px; color: #c9d1d9; font-size: 10px; font-weight: bold; cursor: pointer; }
+        .lang-select { width:100%; padding:15px; border-radius:12px; background:var(--card); border: 1px solid #30363d; color:var(--text); font-weight:bold; margin-bottom:15px; appearance: none; font-size: 16px; border-left: 4px solid var(--primary); outline: none; }
 
-        .lang-select { 
-            width:100%; padding:15px; border-radius:12px; background:var(--card); 
-            border: 1px solid #30363d; color:var(--text); font-weight:bold; margin-bottom:15px; 
-            appearance: none; font-size: 16px; border-left: 4px solid var(--primary); outline: none; 
-        }
-
-        /* --- NAVIGATION --- */
-        .bottom-nav { 
-            position: fixed; bottom: 25px; left: 15px; right: 15px; background: #161b22; 
-            padding: 10px; border-radius: 25px; display: flex; gap: 8px; border: 1px solid #30363d; 
-            z-index: 1000; box-shadow: 0 10px 40px rgba(0,0,0,0.5); 
-        }
+        .bottom-nav { position: fixed; bottom: 25px; left: 15px; right: 15px; background: #161b22; padding: 10px; border-radius: 25px; display: flex; gap: 8px; border: 1px solid #30363d; z-index: 1000; }
         .nav-btn { flex: 1; height: 52px; border-radius: 18px; border: none; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; }
         .btn-main { flex: 2.5; background: var(--primary); font-weight: bold; font-size: 16px; letter-spacing: 1px; }
 
-        /* --- DELETE BUTTON --- */
-        .delete-all-btn {
-            width: 100%; padding: 12px; background: transparent; border: 1px solid #30363d; 
-            color: #8b949e; border-radius: 12px; font-size: 11px; font-weight: bold; 
-            cursor: pointer; transition: 0.2s; margin-bottom: 10px;
-        }
-        .delete-all-btn:hover { background: var(--danger); color: white; border-color: var(--danger); }
-        
+        .delete-all-btn { width: 100%; padding: 12px; background: transparent; border: 1px solid #30363d; color: #8b949e; border-radius: 12px; font-size: 11px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
+        .delete-all-btn:hover { background: var(--danger); color: white; }
         #ocrStatus { display: none; font-size: 12px; color: var(--primary); text-align: center; margin-bottom: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div id="historySidebar">
-        <h2 style="color:var(--primary); margin-bottom: 5px;">History</h2>
-        <p style="font-size: 10px; color: #8b949e; margin: 0;">YOUR RECENT SCANS</p>
-        
-        <div id="historyList" class="history-list">
-            </div>
+    <div id="splash-screen">
+        <div class="splash-logo">JM<span class="splash-prime">PRIME</span></div>
+        <div class="loading-bar"><div class="loading-progress"></div></div>
+    </div>
 
+    <div id="historySidebar">
+        <h2 style="color:var(--primary)">History</h2>
+        <div id="historyList" class="history-list"></div>
         <button class="delete-all-btn" onclick="clearAllHistory()">DELETE ALL HISTORY</button>
         <button class="mini-btn" style="height:45px; width:100%;" onclick="toggleMenu()">CLOSE</button>
     </div>
@@ -99,31 +100,24 @@
     <div class="header-row">
         <button class="menu-btn" onclick="toggleMenu()">☰</button>
         <h1 class="brand-title">JM<span class="brand-prime">PRIME</span></h1>
-        <div id="counter" style="font-size: 10px; color: #8b949e; font-weight: bold;">0 / 5000</div>
+        <div id="counter" style="font-size: 10px; color: #8b949e;">0 / 5000</div>
     </div>
 
     <select id="userLang" class="lang-select">
-        <optgroup label="Popular">
-            <option value="ml|Malayalam Female">Malayalam (മലയാളം)</option>
-            <option value="hi|Hindi Female">Hindi (हिन्दी)</option>
-            <option value="ta|Tamil Female">Tamil (தமிழ்)</option>
-        </optgroup>
-        <optgroup label="International">
-            <option value="es|Spanish Female">Spanish (Español)</option>
-            <option value="fr|French Female">French (Français)</option>
-            <option value="ar|Arabic Male">Arabic (العربية)</option>
-        </optgroup>
+        <option value="ml|Malayalam Female">Malayalam (മലയാളം)</option>
+        <option value="hi|Hindi Female">Hindi (हिन्दी)</option>
+        <option value="es|Spanish Female">Spanish (Español)</option>
     </select>
 
     <div class="glass-card">
-        <div id="ocrStatus">SCANNING IMAGE...</div>
+        <div id="ocrStatus">SCANNING...</div>
         <div class="card-actions">
             <input type="file" id="scanInput" accept="image/*" onchange="processImage(this)" style="display:none">
             <button class="mini-btn" onclick="document.getElementById('scanInput').click()">📷</button>
             <button class="mini-btn" onclick="doClear()">CLEAR</button>
         </div>
-        <span class="label">English Source</span>
-        <textarea id="srcInput" oninput="updateCounter()" placeholder="Type or scan image..."></textarea>
+        <span class="label">Source Text</span>
+        <textarea id="srcInput" oninput="updateCounter()" placeholder="Type or scan..."></textarea>
     </div>
 
     <div class="glass-card" id="outCard">
@@ -131,7 +125,7 @@
             <button class="mini-btn" onclick="doCopy()">COPY</button>
             <button class="mini-btn" onclick="doVoice()">🔊</button>
         </div>
-        <span class="label">Translation Output</span>
+        <span class="label">Translation</span>
         <div id="targetOut" style="font-size:21px; min-height:50px; color:var(--primary); font-weight:600;">...</div>
     </div>
 
@@ -142,117 +136,90 @@
     </div>
 
     <script>
-        // --- 1. SIDEBAR & STORAGE LOGIC ---
+        // 1. Splash Logic
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('splash-screen').classList.add('fade-out');
+            }, 2600); // 2.6 seconds animation
+        });
+
+        // 2. Sidebar & Storage
         function toggleMenu() {
-            const sidebar = document.getElementById('historySidebar');
-            sidebar.classList.toggle('active');
-            if(sidebar.classList.contains('active')) renderHistory();
+            const sb = document.getElementById('historySidebar');
+            sb.classList.toggle('active');
+            if(sb.classList.contains('active')) renderHistory();
         }
 
         function saveHistory(src, out) {
-            let history = JSON.parse(localStorage.getItem('jm_history') || '[]');
-            // Add new item to start of array
-            history.unshift({ src, out, date: new Date().toLocaleTimeString() });
-            if(history.length > 15) history.pop(); // Keep only last 15
-            localStorage.setItem('jm_history', JSON.stringify(history));
+            let h = JSON.parse(localStorage.getItem('jm_history') || '[]');
+            h.unshift({ src, out, date: new Date().toLocaleTimeString() });
+            localStorage.setItem('jm_history', JSON.stringify(h.slice(0,15)));
         }
 
         function renderHistory() {
             const list = document.getElementById('historyList');
-            const history = JSON.parse(localStorage.getItem('jm_history') || '[]');
-            if(history.length === 0) {
-                list.innerHTML = "<p style='font-size:12px; color:#8b949e; text-align:center;'>No history saved.</p>";
-                return;
-            }
-            list.innerHTML = history.map((item, index) => `
-                <div class="history-item" onclick="restoreHistory(${index})">
-                    <strong>${item.src.substring(0,30)}...</strong><br>
+            const h = JSON.parse(localStorage.getItem('jm_history') || '[]');
+            list.innerHTML = h.length ? h.map((item, i) => `
+                <div class="history-item" onclick="restoreHistory(${i})">
+                    <strong>${item.src.substring(0,25)}...</strong><br>
                     <small style="color:var(--primary)">${item.date}</small>
                 </div>
-            `).join('');
+            `).join('') : "<p style='text-align:center; color:#8b949e;'>Empty</p>";
         }
 
-        function restoreHistory(index) {
-            const history = JSON.parse(localStorage.getItem('jm_history'));
-            document.getElementById('srcInput').value = history[index].src;
-            document.getElementById('targetOut').innerText = history[index].out;
-            toggleMenu();
-            updateCounter();
+        function restoreHistory(i) {
+            const h = JSON.parse(localStorage.getItem('jm_history'));
+            document.getElementById('srcInput').value = h[i].src;
+            document.getElementById('targetOut').innerText = h[i].out;
+            toggleMenu(); updateCounter();
         }
 
         function clearAllHistory() {
-            if (confirm("Delete all your recent translation history?")) {
-                localStorage.removeItem('jm_history');
-                renderHistory();
-            }
+            if(confirm("Wipe all history?")) { localStorage.removeItem('jm_history'); renderHistory(); }
         }
 
-        // --- 2. TRANSLATOR LOGIC ---
+        // 3. App Core
         async function doTranslate() {
             const txt = document.getElementById('srcInput').value.trim();
-            const langValue = document.getElementById('userLang').value.split('|');
-            const langCode = langValue[0];
+            const lang = document.getElementById('userLang').value.split('|')[0];
             const out = document.getElementById('targetOut');
-            
             if(!txt) return;
-            out.innerText = "Translating...";
-            
+            out.innerText = "Processing...";
             try {
-                const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(txt)}&langpair=en|${langCode}`);
+                const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(txt)}&langpair=en|${lang}`);
                 const data = await res.json();
-                const result = data.responseData.translatedText;
-                out.innerText = result;
-                saveHistory(txt, result); // Save to browser storage
-            } catch(e) { 
-                out.innerText = "Error. Check internet."; 
-            }
+                out.innerText = data.responseData.translatedText;
+                saveHistory(txt, out.innerText);
+            } catch(e) { out.innerText = "Error!"; }
         }
 
-        // --- 3. HELPER FUNCTIONS ---
         function processImage(input) {
-            if (input.files && input.files[0]) {
-                const status = document.getElementById('ocrStatus');
-                status.style.display = 'block';
+            if (input.files[0]) {
+                document.getElementById('ocrStatus').style.display = 'block';
                 Tesseract.recognize(input.files[0], 'eng').then(({ data: { text } }) => {
                     document.getElementById('srcInput').value = text;
-                    status.style.display = 'none';
-                    updateCounter();
-                    doTranslate(); // Auto-translate after scan
+                    document.getElementById('ocrStatus').style.display = 'none';
+                    updateCounter(); doTranslate();
                 });
             }
         }
 
-        function doVoice() {
-            const txt = document.getElementById('targetOut').innerText;
-            const voiceName = document.getElementById('userLang').value.split('|')[1];
-            if(window.responsiveVoice && txt !== "...") {
-                responsiveVoice.speak(txt, voiceName);
-            }
-        }
-
+        function updateCounter() { document.getElementById('counter').innerText = `${document.getElementById('srcInput').value.length} / 5000`; }
+        function doCopy() { navigator.clipboard.writeText(document.getElementById('targetOut').innerText); alert("Copied!"); }
+        function doClear() { document.getElementById('srcInput').value = ""; document.getElementById('targetOut').innerText = "..."; updateCounter(); }
+        
         async function doPDF() {
             const { jsPDF } = window.jspdf;
             const canvas = await html2canvas(document.getElementById('outCard'), { backgroundColor: '#161b22' });
             const doc = new jsPDF();
-            doc.setTextColor(0, 122, 255);
-            doc.text("JM PRIME TRANSLATION REPORT", 15, 20);
+            doc.text("JM PRIME REPORT", 15, 20);
             doc.addImage(canvas.toDataURL('image/png'), 'PNG', 15, 30, 180, 0);
-            doc.save("JM_PRIME_Scan.pdf");
+            doc.save("JM_PRIME.pdf");
         }
 
-        function updateCounter() {
-            document.getElementById('counter').innerText = `${document.getElementById('srcInput').value.length} / 5000`;
-        }
-
-        function doCopy() {
-            navigator.clipboard.writeText(document.getElementById('targetOut').innerText);
-            alert("Copied to clipboard!");
-        }
-
-        function doClear() {
-            document.getElementById('srcInput').value = "";
-            document.getElementById('targetOut').innerText = "...";
-            updateCounter();
+        function doVoice() {
+            const v = document.getElementById('userLang').value.split('|')[1];
+            responsiveVoice.speak(document.getElementById('targetOut').innerText, v);
         }
     </script>
 </body>
